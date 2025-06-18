@@ -29,15 +29,25 @@ def passive_tests(url, headers):
             return {url : info}
 
 
-def active_tests(url, root, scheme, header_dict, delay, timeout=10, verify=True):
+def active_tests(url, root, scheme, header_dict, delay, timeout=10, verify=True, preflight=False):
+    request_headers = header_dict.copy()
+    method = "OPTIONS" if preflight else "GET"
+    if preflight:
+        request_headers['Access-Control-Request-Method'] = 'GET'
+        request_headers['Access-Control-Request-Headers'] = ', '.join(header_dict.keys())
+
     origin = scheme + '://' + root
-    headers = requester(url, scheme, header_dict, origin, timeout=timeout, verify=verify)
+    headers = requester(
+        url, scheme, request_headers, origin, timeout=timeout, verify=verify, method=method
+    )
     acao_header, acac_header = headers.get('access-control-allow-origin', None), headers.get('access-control-allow-credentials', None)
     if acao_header is None:
         return
     
     origin = scheme + '://' + 'example.com'
-    headers = requester(url, scheme, header_dict, origin, timeout=timeout, verify=verify)
+    headers = requester(
+        url, scheme, request_headers, origin, timeout=timeout, verify=verify, method=method
+    )
     acao_header, acac_header = headers.get('access-control-allow-origin', None), headers.get('access-control-allow-credentials', None)
     if acao_header and acao_header == (origin):
         info = details['origin reflected'].copy()
@@ -47,7 +57,9 @@ def active_tests(url, root, scheme, header_dict, delay, timeout=10, verify=True)
     time.sleep(delay)
 
     origin = scheme + '://' + root + '.example.com'
-    headers = requester(url, scheme, header_dict, origin, timeout=timeout, verify=verify)
+    headers = requester(
+        url, scheme, request_headers, origin, timeout=timeout, verify=verify, method=method
+    )
     acao_header, acac_header = headers.get('access-control-allow-origin', None), headers.get('access-control-allow-credentials', None)
     if acao_header and acao_header == (origin):
         info = details['post-domain wildcard'].copy()
@@ -57,7 +69,9 @@ def active_tests(url, root, scheme, header_dict, delay, timeout=10, verify=True)
     time.sleep(delay)
 
     origin = scheme + '://d3v' + root
-    headers = requester(url, scheme, header_dict, origin, timeout=timeout, verify=verify)
+    headers = requester(
+        url, scheme, request_headers, origin, timeout=timeout, verify=verify, method=method
+    )
     acao_header, acac_header = headers.get('access-control-allow-origin', None), headers.get('access-control-allow-credentials', None)
     if acao_header and acao_header == (origin):
         info = details['pre-domain wildcard'].copy()
@@ -67,7 +81,9 @@ def active_tests(url, root, scheme, header_dict, delay, timeout=10, verify=True)
     time.sleep(delay)
 
     origin = 'null'
-    headers = requester(url, '', header_dict, origin, timeout=timeout, verify=verify)
+    headers = requester(
+        url, '', request_headers, origin, timeout=timeout, verify=verify, method=method
+    )
     acao_header, acac_header = headers.get('access-control-allow-origin', None), headers.get('access-control-allow-credentials', None)
     if acao_header and acao_header == 'null':
         info = details['null origin allowed'].copy()
@@ -77,7 +93,9 @@ def active_tests(url, root, scheme, header_dict, delay, timeout=10, verify=True)
     time.sleep(delay)
 
     origin = scheme + '://' + root + '_.example.com'
-    headers = requester(url, scheme, header_dict, origin, timeout=timeout, verify=verify)
+    headers = requester(
+        url, scheme, request_headers, origin, timeout=timeout, verify=verify, method=method
+    )
     acao_header, acac_header = headers.get('access-control-allow-origin', None), headers.get('access-control-allow-credentials', None)
     if acao_header and acao_header == origin:
         info = details['unrecognized underscore'].copy()
@@ -87,7 +105,9 @@ def active_tests(url, root, scheme, header_dict, delay, timeout=10, verify=True)
     time.sleep(delay)
 
     origin = scheme + '://' + root + '%60.example.com'
-    headers = requester(url, scheme, header_dict, origin, timeout=timeout, verify=verify)
+    headers = requester(
+        url, scheme, request_headers, origin, timeout=timeout, verify=verify, method=method
+    )
     acao_header, acac_header = headers.get('access-control-allow-origin', None), headers.get('access-control-allow-credentials', None)
     if acao_header and '`.example.com' in acao_header:
         info = details['broken parser'].copy()
@@ -98,7 +118,9 @@ def active_tests(url, root, scheme, header_dict, delay, timeout=10, verify=True)
 
     if root.count('.') > 1:
         origin = scheme + '://' + root.replace('.', 'x', 1)
-        headers = requester(url, scheme, header_dict, origin, timeout=timeout, verify=verify)
+        headers = requester(
+            url, scheme, request_headers, origin, timeout=timeout, verify=verify, method=method
+        )
         acao_header, acac_header = headers.get('access-control-allow-origin', None), headers.get('access-control-allow-credentials', None)
         if acao_header and acao_header == origin:
             info = details['unescaped regex'].copy()
@@ -107,7 +129,9 @@ def active_tests(url, root, scheme, header_dict, delay, timeout=10, verify=True)
             return {url : info}
         time.sleep(delay)
     origin = 'http://' + root
-    headers = requester(url, 'http', header_dict, origin, timeout=timeout, verify=verify)
+    headers = requester(
+        url, 'http', request_headers, origin, timeout=timeout, verify=verify, method=method
+    )
     acao_header, acac_header = headers.get('access-control-allow-origin', None), headers.get('access-control-allow-credentials', None)
     if acao_header and acao_header.startswith('http://'):
         info = details['http origin allowed'].copy()

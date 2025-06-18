@@ -35,6 +35,7 @@ def main():
     parser.add_argument('--headers', help='add headers', dest='header_dict', nargs='?', const=True)
     parser.add_argument('--timeout', help='request timeout', dest='timeout', type=float, default=10)
     parser.add_argument('-k', '--insecure', help='disable TLS verification', dest='insecure', action='store_true')
+    parser.add_argument('--preflight', help='send OPTIONS preflight request', dest='preflight', action='store_true')
     args = parser.parse_args()
 
     delay = args.delay
@@ -46,6 +47,7 @@ def main():
     header_dict = args.header_dict
     timeout = args.timeout
     verify_cert = not args.insecure
+    preflight = args.preflight
 
     if type(header_dict) == bool:
         header_dict = extractHeaders(prompt())
@@ -73,7 +75,7 @@ def main():
         urls = collect_urls(target, sys.stdin)
 
 
-    def cors(target, header_dict, delay, timeout, verify):
+    def cors(target, header_dict, delay, timeout, verify, preflight):
         url = target
         root = host(url)
         parsed = urlparse(url)
@@ -81,7 +83,9 @@ def main():
         scheme = parsed.scheme
         url = scheme + '://' + netloc + parsed.path
         try:
-            return active_tests(url, root, scheme, header_dict, delay, timeout=timeout, verify=verify)
+            return active_tests(
+                url, root, scheme, header_dict, delay, timeout=timeout, verify=verify, preflight=preflight
+            )
         except ConnectionError:
             print('%s Unable to connect to %s' % (bad, root))
 
@@ -91,7 +95,7 @@ def main():
         results = []
         threadpool = concurrent.futures.ThreadPoolExecutor(max_workers=threads)
         futures = (
-            threadpool.submit(cors, url, header_dict, delay, timeout, verify_cert)
+            threadpool.submit(cors, url, header_dict, delay, timeout, verify_cert, preflight)
             for url in urls
         )
         for each in concurrent.futures.as_completed(futures):
