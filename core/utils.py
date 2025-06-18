@@ -1,6 +1,7 @@
 import os
 import json
 import tempfile
+import subprocess
 
 from urllib.parse import urlparse
 
@@ -43,21 +44,15 @@ def collect_urls(target_url=None, source=None):
     return urls
 
 def prompt(default=None):
-    editor = 'nano'
+    editor = os.getenv('EDITOR', 'nano')
     with tempfile.NamedTemporaryFile(mode='r+') as tmpfile:
         if default:
             tmpfile.write(default)
             tmpfile.flush()
 
-        child_pid = os.fork()
-        is_child = child_pid == 0
-
-        if is_child:
-            os.execvp(editor, [editor, tmpfile.name])
-        else:
-            os.waitpid(child_pid, 0)
-            tmpfile.seek(0)
-            return tmpfile.read().strip()
+        subprocess.run([editor, tmpfile.name])
+        tmpfile.seek(0)
+        return tmpfile.read().strip()
 
 
 def extractHeaders(headers: str):
