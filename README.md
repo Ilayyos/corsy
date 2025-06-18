@@ -47,6 +47,12 @@ Using Corsy is pretty simple
 ##### Delay between requests
 `python3 corsy.py -u https://example.com -d 2`
 
+##### Request timeout
+`python3 corsy.py -u https://example.com --timeout 5`
+
+##### Disable TLS verification
+`python3 corsy.py -u https://example.com -k`
+
 ##### Export results to JSON
 `python3 corsy.py -i /path/urls.txt -o /path/output.json`
 
@@ -65,6 +71,7 @@ Using Corsy is pretty simple
 - Underscore bypass
 - Invalid value
 - Wild card value
+- Wildcard value with credentials
 - Origin reflection test
 - Third party allowance test
 - HTTP allowance test
