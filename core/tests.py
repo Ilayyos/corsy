@@ -1,7 +1,11 @@
 import sys
 import time
 
-from core.requester import requester
+try:
+    from core.requester import requester  # requires requests/urllib3
+except Exception:
+    requester = None
+
 from core.utils import host, load_json
 
 details = load_json(sys.path[0] + '/db/details.json')

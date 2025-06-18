@@ -60,9 +60,24 @@ def prompt(default=None):
             return tmpfile.read().strip()
 
 
-def extractHeaders(headers: str):
+def extractHeaders(headers: str, warn: bool = False):
+    """Parse a header string into a dictionary.
+
+    Blank lines and lines missing a ``:`` are ignored. If ``warn`` is ``True``
+    a warning is printed for every ignored malformed line.
+    """
+
     sorted_headers = {}
-    for header in headers.split('\\n'):
+    for header in headers.split('\n'):
+        header = header.strip()
+        if not header:
+            continue
+
+        if ':' not in header:
+            if warn:
+                print(f"Warning: ignoring malformed header '{header}'")
+            continue
+
         name, value = header.split(":", 1)
         name = name.strip()
         value = value.strip()
