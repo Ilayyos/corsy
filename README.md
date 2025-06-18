@@ -75,3 +75,11 @@ Using Corsy is pretty simple
 - Origin reflection test
 - Third party allowance test
 - HTTP allowance test
+
+### Running tests
+Install the development requirements and run pytest:
+
+```bash
+pip3 install -r requirements-dev.txt
+pytest
+```
