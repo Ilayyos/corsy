@@ -4,11 +4,11 @@
 import sys
 import json
 import argparse
-from requests.exceptions import ConnectionError
+from requests.exceptions import ConnectionError as RequestsConnectionError
 
 from core.tests import active_tests
 from core.utils import host, prompt, format_result, extractHeaders, collect_urls
-from core.colors import bad, end, red, run, good, grey, green, white, yellow
+from core.colors import bad, end, run, good, grey, green, white, yellow
 
 
 def main():
@@ -81,8 +81,10 @@ def main():
         scheme = parsed.scheme
         url = scheme + '://' + netloc + parsed.path
         try:
-            return active_tests(url, root, scheme, header_dict, delay, timeout=timeout, verify=verify)
-        except ConnectionError:
+            return active_tests(
+                url, root, scheme, header_dict, delay, timeout=timeout, verify=verify
+            )
+        except RequestsConnectionError:
             print('%s Unable to connect to %s' % (bad, root))
 
     if urls:
