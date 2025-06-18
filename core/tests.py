@@ -1,7 +1,8 @@
 import sys
 import time
+import asyncio
 
-from core.requester import requester
+from core.requester import requester, requester_async
 from core.utils import host, load_json
 
 details = load_json(sys.path[0] + '/db/details.json')
@@ -106,6 +107,95 @@ def active_tests(url, root, scheme, header_dict, delay, timeout=10, verify=True)
         time.sleep(delay)
     origin = 'http://' + root
     headers = requester(url, 'http', header_dict, origin, timeout=timeout, verify=verify)
+    acao_header, acac_header = headers.get('access-control-allow-origin', None), headers.get('access-control-allow-credentials', None)
+    if acao_header and acao_header.startswith('http://'):
+        info = details['http origin allowed'].copy()
+        info['acao header'] = acao_header
+        info['acac header'] = acac_header
+        return {url : info}
+    else:
+        return passive_tests(url, headers)
+
+
+async def active_tests_async(url, root, scheme, header_dict, delay, timeout=10, verify=True):
+    origin = scheme + '://' + root
+    headers = await requester_async(url, scheme, header_dict, origin, timeout=timeout, verify=verify)
+    acao_header, acac_header = headers.get('access-control-allow-origin', None), headers.get('access-control-allow-credentials', None)
+    if acao_header is None:
+        return
+
+    origin = scheme + '://' + 'example.com'
+    headers = await requester_async(url, scheme, header_dict, origin, timeout=timeout, verify=verify)
+    acao_header, acac_header = headers.get('access-control-allow-origin', None), headers.get('access-control-allow-credentials', None)
+    if acao_header and acao_header == (origin):
+        info = details['origin reflected'].copy()
+        info['acao header'] = acao_header
+        info['acac header'] = acac_header
+        return {url : info}
+    await asyncio.sleep(delay)
+
+    origin = scheme + '://' + root + '.example.com'
+    headers = await requester_async(url, scheme, header_dict, origin, timeout=timeout, verify=verify)
+    acao_header, acac_header = headers.get('access-control-allow-origin', None), headers.get('access-control-allow-credentials', None)
+    if acao_header and acao_header == (origin):
+        info = details['post-domain wildcard'].copy()
+        info['acao header'] = acao_header
+        info['acac header'] = acac_header
+        return {url : info}
+    await asyncio.sleep(delay)
+
+    origin = scheme + '://d3v' + root
+    headers = await requester_async(url, scheme, header_dict, origin, timeout=timeout, verify=verify)
+    acao_header, acac_header = headers.get('access-control-allow-origin', None), headers.get('access-control-allow-credentials', None)
+    if acao_header and acao_header == (origin):
+        info = details['pre-domain wildcard'].copy()
+        info['acao header'] = acao_header
+        info['acac header'] = acac_header
+        return {url : info}
+    await asyncio.sleep(delay)
+
+    origin = 'null'
+    headers = await requester_async(url, '', header_dict, origin, timeout=timeout, verify=verify)
+    acao_header, acac_header = headers.get('access-control-allow-origin', None), headers.get('access-control-allow-credentials', None)
+    if acao_header and acao_header == 'null':
+        info = details['null origin allowed'].copy()
+        info['acao header'] = acao_header
+        info['acac header'] = acac_header
+        return {url : info}
+    await asyncio.sleep(delay)
+
+    origin = scheme + '://' + root + '_.example.com'
+    headers = await requester_async(url, scheme, header_dict, origin, timeout=timeout, verify=verify)
+    acao_header, acac_header = headers.get('access-control-allow-origin', None), headers.get('access-control-allow-credentials', None)
+    if acao_header and acao_header == origin:
+        info = details['unrecognized underscore'].copy()
+        info['acao header'] = acao_header
+        info['acac header'] = acac_header
+        return {url : info}
+    await asyncio.sleep(delay)
+
+    origin = scheme + '://' + root + '%60.example.com'
+    headers = await requester_async(url, scheme, header_dict, origin, timeout=timeout, verify=verify)
+    acao_header, acac_header = headers.get('access-control-allow-origin', None), headers.get('access-control-allow-credentials', None)
+    if acao_header and '`.example.com' in acao_header:
+        info = details['broken parser'].copy()
+        info['acao header'] = acao_header
+        info['acac header'] = acac_header
+        return {url : info}
+    await asyncio.sleep(delay)
+
+    if root.count('.') > 1:
+        origin = scheme + '://' + root.replace('.', 'x', 1)
+        headers = await requester_async(url, scheme, header_dict, origin, timeout=timeout, verify=verify)
+        acao_header, acac_header = headers.get('access-control-allow-origin', None), headers.get('access-control-allow-credentials', None)
+        if acao_header and acao_header == origin:
+            info = details['unescaped regex'].copy()
+            info['acao header'] = acao_header
+            info['acac header'] = acac_header
+            return {url : info}
+        await asyncio.sleep(delay)
+    origin = 'http://' + root
+    headers = await requester_async(url, 'http', header_dict, origin, timeout=timeout, verify=verify)
     acao_header, acac_header = headers.get('access-control-allow-origin', None), headers.get('access-control-allow-credentials', None)
     if acao_header and acao_header.startswith('http://'):
         info = details['http origin allowed'].copy()

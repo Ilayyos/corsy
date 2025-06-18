@@ -24,11 +24,12 @@ Corsy is a lightweight program that scans for all known misconfigurations in COR
 ![demo](https://i.ibb.co/Jc1HtmW/corsy.png)
 
 ### Requirements
-Corsy only works with `Python 3` and has just one dependency:
+Corsy only works with `Python 3` and requires:
 
 - `requests`
+- `aiohttp` (for async mode)
 
-To install this dependency, navigate to Corsy directory and execute `pip3 install requests`
+Install dependencies with `pip3 install -r requirements.txt`
 
 ### Usage
 Using Corsy is pretty simple
@@ -52,6 +53,9 @@ Using Corsy is pretty simple
 
 ##### Disable TLS verification
 `python3 corsy.py -u https://example.com -k`
+
+##### Async scanning mode
+`python3 corsy.py -u https://example.com --mode async`
 
 ##### Export results to JSON
 `python3 corsy.py -i /path/urls.txt -o /path/output.json`
