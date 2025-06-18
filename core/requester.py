@@ -9,7 +9,7 @@ session = requests.Session()
 # Added better error handling.
 # Added verbose options.
 
-def requester(url, scheme, headers, origin, timeout=10, verify=True):
+def requester(url, headers, origin, timeout=10, verify=True):
     """Send a request with the supplied origin and return response headers."""
     request_headers = headers.copy()
     request_headers['Origin'] = origin
