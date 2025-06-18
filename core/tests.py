@@ -1,10 +1,15 @@
-import sys
+import os
 import time
 
 from core.requester import requester
 from core.utils import host, load_json
 
-details = load_json(sys.path[0] + '/db/details.json')
+details_path = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)),
+    'db',
+    'details.json',
+)
+details = load_json(details_path)
 
 def passive_tests(url, headers):
     root = host(url)
