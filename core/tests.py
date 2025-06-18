@@ -1,10 +1,12 @@
-import sys
 import time
+import json
+import pkgutil
 
 from core.requester import requester
-from core.utils import host, load_json
+from core.utils import host
 
-details = load_json(sys.path[0] + '/db/details.json')
+# Load vulnerability details bundled with the package
+details = json.loads(pkgutil.get_data('db', 'details.json').decode())
 
 def passive_tests(url, headers):
     root = host(url)
