@@ -60,13 +60,28 @@ def prompt(default=None):
             return tmpfile.read().strip()
 
 
-def extractHeaders(headers: str):
+def extractHeaders(headers: str, warn: bool = False):
+    """Return a dictionary of HTTP headers from a string.
+
+    Lines without a colon are ignored. If ``warn`` is ``True`` and such
+    lines are encountered, a warning message is printed.
+    """
+
+    # Support both escaped ``\n`` sequences (as provided via the command line)
+    # and real newlines (as produced by ``prompt()``).
+    headers = headers.replace("\\n", "\n")
+
     sorted_headers = {}
-    for header in headers.split('\\n'):
-        name, value = header.split(":", 1)
+    for line in headers.split("\n"):
+        if ":" not in line:
+            if warn and line.strip():
+                from core.colors import bad
+                print(f"{bad} ignoring invalid header line: {line.strip()}")
+            continue
+        name, value = line.split(":", 1)
         name = name.strip()
         value = value.strip()
-        if len(value) >= 1 and value[-1] == ',':
+        if value.endswith(','):
             value = value[:-1]
         sorted_headers[name] = value
     return sorted_headers
