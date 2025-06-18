@@ -26,9 +26,9 @@ Corsy is a lightweight program that scans for all known misconfigurations in COR
 ### Requirements
 Corsy only works with `Python 3` and has just one dependency:
 
-- `requests`
+- `requests>=2.31,<3`
 
-To install this dependency, navigate to Corsy directory and execute `pip3 install requests`
+Navigate to the project directory and execute `pip3 install -r requirements.txt` to install this dependency. A pinned version is also available in `requirements.lock` if a reproducible setup is required.
 
 ### Usage
 Using Corsy is pretty simple
