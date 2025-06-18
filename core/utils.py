@@ -1,8 +1,6 @@
 import os
-import re
 import json
 import tempfile
-import re
 
 from urllib.parse import urlparse
 
@@ -25,24 +23,22 @@ def format_result(result):
     return new_result
 
 
-def create_url_list(target_url, inp_file):
-    urls = []
-    if inp_file:
-        with open(inp_file, 'r') as file:
-            for line in file:
-                if line.startswith(('http://', 'https://')):
-                    urls.append(line.rstrip('\n'))
-    if target_url and target_url.startswith(('http://', 'https://')):
-        urls.append(target_url)
-    return urls
+def collect_urls(target_url=None, source=None):
+    """Return a list of URLs from a target string or iterable source.
 
-def create_stdin_list(target_url, inp_file):
+    Parameters
+    ----------
+    target_url : str or None
+        Single URL supplied via the command line.
+    source : iterable or None
+        Iterable containing newline-separated URLs (e.g. file or sys.stdin).
+    """
     urls = []
-    if inp_file:
-        for line in inp_file.readlines():
-            if line.startswith(('http://', 'https://')):
-                urls.append(line.rstrip('\n'))
-    if target_url and target_url.startswith(('http://', 'https://')):
+    if source:
+        for line in source:
+            if line.startswith(("http://", "https://")):
+                urls.append(line.rstrip("\n"))
+    if target_url and target_url.startswith(("http://", "https://")):
         urls.append(target_url)
     return urls
 
