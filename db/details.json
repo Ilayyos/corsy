@@ -1,10 +1,16 @@
 {
-	"wildcard value" : {
-		"class" : "wildcard value",
-		"description" : "This host allows requests made from any origin. However, browsers will block all requests to this host by default.",
-		"severity" : "low",
-		"exploitation" : "Not possible"
-	},
+        "wildcard value" : {
+                "class" : "wildcard value",
+                "description" : "This host allows requests made from any origin. However, browsers will block all requests to this host by default.",
+                "severity" : "low",
+                "exploitation" : "Not possible"
+        },
+        "wildcard credentials" : {
+                "class" : "wildcard credentials",
+                "description" : "The server allows credentials from any origin by setting Access-Control-Allow-Credentials to true while using a wildcard origin.",
+                "severity" : "high",
+                "exploitation" : "Craft requests from any domain and include credentials."
+        },
 	"third party allowed" : {
 		"class" : "third party allowed",
 		"description" : "This host has whitelisted a third party host for cross origin requests.",
