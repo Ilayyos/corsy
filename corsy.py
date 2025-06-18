@@ -1,40 +1,76 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+"""Command-line interface for the CORSY scanner."""
+
 import sys
 import json
 import argparse
 from requests.exceptions import ConnectionError
 
 from core.tests import active_tests
-from core.utils import host, prompt, format_result, extractHeaders, collect_urls
+from core.utils import (
+    host,
+    prompt,
+    format_result,
+    extractHeaders,
+    collect_urls,
+)
 from core.colors import bad, end, red, run, good, grey, green, white, yellow
 
 
 def main():
     """Entry point for running the CORS scanner from the command line."""
-    print('''
+    print(
+        """
     %sＣＯＲＳＹ  %s{%sv1.0-beta%s}%s
-    ''' % (green, white, grey, white, end))
-
+    """
+        % (green, white, grey, white, end)
+    )
 
     try:
         import concurrent.futures
         from urllib.parse import urlparse
     except ImportError:
-        print(' %s corsy needs Python > 3.4 to run.' % bad)
+        print(" %s corsy needs Python > 3.4 to run." % bad)
         return
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-u', help='target url', dest='target')
-    parser.add_argument('-o', help='json output file', dest='json_file')
-    parser.add_argument('-i', help='input file urls/subdomains', dest='inp_file')
-    parser.add_argument('-t', help='thread count', dest='threads', type=int, default=2)
-    parser.add_argument('-d', help='request delay', dest='delay', type=float, default=0)
-    parser.add_argument('-q', help='don\'t print help tips', dest='quiet', action='store_true')
-    parser.add_argument('--headers', help='add headers', dest='header_dict', nargs='?', const=True)
-    parser.add_argument('--timeout', help='request timeout', dest='timeout', type=float, default=10)
-    parser.add_argument('-k', '--insecure', help='disable TLS verification', dest='insecure', action='store_true')
+    parser.add_argument("-u", help="target url", dest="target")
+    parser.add_argument("-o", help="json output file", dest="json_file")
+    parser.add_argument(
+        "-i", help="input file urls/subdomains", dest="inp_file"
+    )
+    parser.add_argument(
+        "-t", help="thread count", dest="threads", type=int, default=2
+    )
+    parser.add_argument(
+        "-d", help="request delay", dest="delay", type=float, default=0
+    )
+    parser.add_argument(
+        "-q", help="don't print help tips", dest="quiet", action="store_true"
+    )
+    parser.add_argument(
+        "--headers",
+        help="add headers",
+        dest="header_dict",
+        nargs="?",
+        const=True,
+    )
+    parser.add_argument(
+        "--timeout",
+        help="request timeout",
+        dest="timeout",
+        type=float,
+        default=10,
+    )
+    parser.add_argument(
+        "-k",
+        "--insecure",
+        help="disable TLS verification",
+        dest="insecure",
+        action="store_true",
+    )
     args = parser.parse_args()
 
     delay = args.delay
@@ -53,25 +89,29 @@ def main():
         header_dict = extractHeaders(header_dict)
     else:
         header_dict = {
-            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:70.0) Gecko/20100101 Firefox/70.0',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.5',
-            'Accept-Encoding': 'gzip',
-            'DNT': '1',
-            'Connection': 'close',
+            "User-Agent": (
+                "Mozilla/5.0 (X11; Linux x86_64; rv:70.0) Gecko/20100101 "
+                "Firefox/70.0"
+            ),
+            "Accept": (
+                "text/html,application/xhtml+xml,application/xml;q=0.9,"
+                "*/*;q=0.8"
+            ),
+            "Accept-Language": "en-US,en;q=0.5",
+            "Accept-Encoding": "gzip",
+            "DNT": "1",
+            "Connection": "close",
         }
-
 
     # PIPE output from other tools such as httprobe etc
     if sys.stdin.isatty():
         if inp_file:
-            with open(inp_file, 'r') as source:
+            with open(inp_file, "r") as source:
                 urls = collect_urls(target, source)
         else:
             urls = collect_urls(target, [])
     else:
         urls = collect_urls(target, sys.stdin)
-
 
     def cors(target, header_dict, delay, timeout, verify):
         url = target
@@ -79,19 +119,32 @@ def main():
         parsed = urlparse(url)
         netloc = parsed.netloc
         scheme = parsed.scheme
-        url = scheme + '://' + netloc + parsed.path
+        url = scheme + "://" + netloc + parsed.path
         try:
-            return active_tests(url, root, scheme, header_dict, delay, timeout=timeout, verify=verify)
+            return active_tests(
+                url,
+                root,
+                scheme,
+                header_dict,
+                delay,
+                timeout=timeout,
+                verify=verify,
+            )
         except ConnectionError:
-            print('%s Unable to connect to %s' % (bad, root))
+            print("%s Unable to connect to %s" % (bad, root))
 
     if urls:
         if len(urls) > 1:
-            print(' %s Estimated scan time: %i secs' % (run, round(len(urls) * 1.75)))
+            print(
+                " %s Estimated scan time: %i secs"
+                % (run, round(len(urls) * 1.75))
+            )
         results = []
         threadpool = concurrent.futures.ThreadPoolExecutor(max_workers=threads)
         futures = (
-            threadpool.submit(cors, url, header_dict, delay, timeout, verify_cert)
+            threadpool.submit(
+                cors, url, header_dict, delay, timeout, verify_cert
+            )
             for url in urls
         )
         for each in concurrent.futures.as_completed(futures):
@@ -99,24 +152,42 @@ def main():
             results.append(result)
             if result:
                 for i in result:
-                    print(' %s %s' % (good, i))
-                    print('   %s-%s Class: %s' % (yellow, end, result[i]['class']))
+                    print(" %s %s" % (good, i))
+                    print(
+                        "   %s-%s Class: %s"
+                        % (yellow, end, result[i]["class"])
+                    )
                     if not quiet:
-                        print('   %s-%s Description: %s' % (yellow, end, result[i]['description']))
-                        print('   %s-%s Severity: %s' % (yellow, end, result[i]['severity']))
-                        print('   %s-%s Exploitation: %s' % (yellow, end, result[i]['exploitation']))
-                    print('   %s-%s ACAO Header: %s' % (yellow, end, result[i]['acao header']))
-                    print('   %s-%s ACAC Header: %s\n' % (yellow, end, result[i]['acac header']))
+                        print(
+                            "   %s-%s Description: %s"
+                            % (yellow, end, result[i]["description"])
+                        )
+                        print(
+                            "   %s-%s Severity: %s"
+                            % (yellow, end, result[i]["severity"])
+                        )
+                        print(
+                            "   %s-%s Exploitation: %s"
+                            % (yellow, end, result[i]["exploitation"])
+                        )
+                    print(
+                        "   %s-%s ACAO Header: %s"
+                        % (yellow, end, result[i]["acao header"])
+                    )
+                    print(
+                        "   %s-%s ACAC Header: %s\n"
+                        % (yellow, end, result[i]["acac header"])
+                    )
         results = format_result(results)
         if results:
             if json_file:
-                with open(json_file, 'w+') as file:
+                with open(json_file, "w+") as file:
                     json.dump(results, file, indent=4)
         else:
-            print(' %s No misconfigurations found.' % bad)
+            print(" %s No misconfigurations found." % bad)
     else:
-        print(' %s No valid URLs to test.' % bad)
+        print(" %s No valid URLs to test." % bad)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
