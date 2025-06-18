@@ -61,9 +61,20 @@ def prompt(default=None):
 
 
 def extractHeaders(headers: str):
+    """Return headers parsed into a dictionary.
+
+    Lines without a ``:`` separator are ignored with a warning instead of
+    raising an exception.
+    """
     sorted_headers = {}
-    for header in headers.split('\\n'):
-        name, value = header.split(":", 1)
+    for header in headers.split('\n'):
+        header = header.strip()
+        if not header:
+            continue
+        if ':' not in header:
+            print(f"Skipping invalid header line: {header}")
+            continue
+        name, value = header.split(':', 1)
         name = name.strip()
         value = value.strip()
         if len(value) >= 1 and value[-1] == ',':
