@@ -1,10 +1,13 @@
 import sys
 import time
+from pathlib import Path
 
 from core.requester import requester
 from core.utils import host, load_json
 
-details = load_json(sys.path[0] + '/db/details.json')
+# Load vulnerability descriptions from the db directory relative to this file
+details_path = Path(__file__).resolve().parents[1] / 'db' / 'details.json'
+details = load_json(details_path)
 
 def passive_tests(url, headers):
     root = host(url)
