@@ -28,36 +28,47 @@ Corsy only works with `Python 3` and has just one dependency:
 
 - `requests`
 
-To install this dependency, navigate to Corsy directory and execute `pip3 install requests`
+### Installation
+Install the tool with `pip` to automatically handle the dependency:
+
+```bash
+pip install .
+```
+
+This will install `corsy` and make a `corsy` command available in your PATH.
 
 ### Usage
 Using Corsy is pretty simple
 
-`python3 corsy.py -u https://example.com`
+Run it as a command after installation:
+
+```bash
+corsy -u https://example.com
+```
 
 ##### Scan URLs from a file
-`python3 corsy.py -i /path/urls.txt`
+`corsy -i /path/urls.txt`
 
 ##### Scan URLs from stdin
-`cat urls.txt | python3 corsy.py`
+`cat urls.txt | corsy`
 
 ##### Number of threads
-`python3 corsy.py -u https://example.com -t 20`
+`corsy -u https://example.com -t 20`
 
 ##### Delay between requests
-`python3 corsy.py -u https://example.com -d 2`
+`corsy -u https://example.com -d 2`
 
 ##### Request timeout
-`python3 corsy.py -u https://example.com --timeout 5`
+`corsy -u https://example.com --timeout 5`
 
 ##### Disable TLS verification
-`python3 corsy.py -u https://example.com -k`
+`corsy -u https://example.com -k`
 
 ##### Export results to JSON
-`python3 corsy.py -i /path/urls.txt -o /path/output.json`
+`corsy -i /path/urls.txt -o /path/output.json`
 
 ##### Custom HTTP headers
-`python3 corsy.py -u https://example.com --headers "User-Agent: GoogleBot\nCookie: SESSION=Hacked"`
+`corsy -u https://example.com --headers "User-Agent: GoogleBot\nCookie: SESSION=Hacked"`
 
 ##### Skip printing tips
 `-q` can be used to skip printing of `description`, `severity`, `exploitation` fields in the output.
