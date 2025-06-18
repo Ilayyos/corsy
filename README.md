@@ -59,6 +59,9 @@ Using Corsy is pretty simple
 ##### Custom HTTP headers
 `python3 corsy.py -u https://example.com --headers "User-Agent: GoogleBot\nCookie: SESSION=Hacked"`
 
+Running `--headers` without a value opens your editor for interactive entry. The
+program uses the `EDITOR` environment variable or defaults to `nano`.
+
 ##### Skip printing tips
 `-q` can be used to skip printing of `description`, `severity`, `exploitation` fields in the output.
 
