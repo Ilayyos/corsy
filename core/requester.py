@@ -9,13 +9,17 @@ session = requests.Session()
 # Added better error handling.
 # Added verbose options.
 
-def requester(url, scheme, headers, origin, timeout=10, verify=True):
+def requester(url, scheme, headers, origin, timeout=10, verify=True, method="GET"):
     """Send a request with the supplied origin and return response headers."""
     request_headers = headers.copy()
     request_headers['Origin'] = origin
     try:
-        response = session.get(
-            url, headers=request_headers, verify=verify, timeout=timeout
+        response = session.request(
+            method,
+            url,
+            headers=request_headers,
+            verify=verify,
+            timeout=timeout,
         )
         headers = response.headers
         return headers

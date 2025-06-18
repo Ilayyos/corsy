@@ -53,6 +53,9 @@ Using Corsy is pretty simple
 ##### Disable TLS verification
 `python3 corsy.py -u https://example.com -k`
 
+##### Use preflight OPTIONS request
+`python3 corsy.py -u https://example.com --preflight`
+
 ##### Export results to JSON
 `python3 corsy.py -i /path/urls.txt -o /path/output.json`
 
