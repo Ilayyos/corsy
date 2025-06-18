@@ -48,9 +48,9 @@ def main():
     verify_cert = not args.insecure
 
     if type(header_dict) == bool:
-        header_dict = extractHeaders(prompt())
+        header_dict = extractHeaders(prompt(), warn=True)
     elif type(header_dict) == str:
-        header_dict = extractHeaders(header_dict)
+        header_dict = extractHeaders(header_dict, warn=True)
     else:
         header_dict = {
             'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:70.0) Gecko/20100101 Firefox/70.0',
